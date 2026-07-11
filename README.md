@@ -20,7 +20,7 @@
 - Q-PGA campaign-agent briefs for positioning, permission-led email, social posts, evidence workshops and 30-day launch plans.
 - A first-pass scanner for risky clinical, comparative, regulatory, safety and absolute claims.
 - Human-review checkpoints for medical, legal, regulatory, privacy and brand approval.
-- Institutional-pilot intake for governed private deployment.
+- Institutional-pilot planning for governed private deployment.
 
 ## Built for
 
@@ -41,7 +41,8 @@ The agent drafts locally in the browser. It does not scrape contacts, autonomous
 ## Explore
 
 - **Live platform:** [QAGE² Pharma Growth](https://chenchongzhi.github.io/ChenChongZhi/)
-- **Institutional pilot:** use the repository's institutional-pilot issue form
+- **Shareable launch page:** [QAGE² public launch](https://chenchongzhi.github.io/ChenChongZhi/launch.html)
+- **Campaign assets:** [public and permission-led launch copy](CAMPAIGN_ASSETS.md)
 - **Campaign framework:** [60-day permission-led campaign playbook](CAMPAIGN_PLAYBOOK.md)
 - **Payment integration:** [one-time checkout setup](PAYMENT_SETUP.md)
 - **Security boundary:** [responsible-use and security notes](SECURITY.md)
