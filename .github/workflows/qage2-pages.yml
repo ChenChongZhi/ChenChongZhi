@@ -1,0 +1,85 @@
+name: Deploy QAGE2 Pharma Growth to Pages
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "site/**"
+      - "site.tar.xz.b64"
+      - "site_bundle/**"
+      - ".github/workflows/qage2-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Decode compact site bundle when present
+        run: |
+          if [ -d site_bundle ]; then
+            rm -rf site
+            cat site_bundle/part* > site.tar.xz.b64
+            base64 --decode site.tar.xz.b64 > site.tar.xz
+            tar -xJf site.tar.xz
+          elif [ -f site.tar.xz.b64 ]; then
+            rm -rf site
+            base64 --decode site.tar.xz.b64 > site.tar.xz
+            tar -xJf site.tar.xz
+          fi
+          test -f site/index.html
+      - name: Inject public payment endpoints
+        env:
+          QAGE2_CHECKOUT_URL: ${{ vars.QAGE2_CHECKOUT_URL }}
+          QAGE2_VERIFICATION_URL: ${{ vars.QAGE2_VERIFICATION_URL }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os
+
+          values = {
+              "__QAGE2_CHECKOUT_URL__": os.environ.get("QAGE2_CHECKOUT_URL", "").strip(),
+              "__QAGE2_VERIFICATION_URL__": os.environ.get("QAGE2_VERIFICATION_URL", "").strip(),
+          }
+          configured = [bool(value) for value in values.values()]
+          if any(configured) and not all(configured):
+              raise SystemExit("Configure both QAGE2_CHECKOUT_URL and QAGE2_VERIFICATION_URL, or leave both blank.")
+
+          path = Path("site/billing-config.js")
+          text = path.read_text(encoding="utf-8")
+          if all(configured):
+              for placeholder, value in values.items():
+                  if not value.startswith("https://"):
+                      raise SystemExit(f"{placeholder} must be replaced by an HTTPS URL")
+                  text = text.replace(placeholder, value)
+              print("Injected the public checkout and verification endpoints.")
+          else:
+              print("Payment endpoints are not configured; checkout remains safely disabled.")
+          path.write_text(text, encoding="utf-8")
+          PY
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "site"
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
