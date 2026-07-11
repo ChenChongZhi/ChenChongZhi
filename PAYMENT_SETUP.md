@@ -6,23 +6,43 @@ The public offer is scheduled as follows:
 - one-time paid access from **16 July 2026 at 00:00 Asia/Singapore**;
 - fixed price: **US$10**, one payment, no subscription or automatic renewal.
 
+## Current status
+
+A live merchant checkout URL has **not** yet been attached. The application intentionally keeps the payment button in setup mode instead of routing money to an unverified destination.
+
+Do not send an API secret, password, recovery code or payment-card information. Only the final public Stripe Payment Link in the form `https://buy.stripe.com/...` should be added to the site.
+
 ## Create the hosted checkout
 
-Recommended low-code path: create a provider-hosted one-time Payment Link for **Q-PGA Founding Agent Access** at USD 10.00.
+Open the Stripe Dashboard's Payment Link creator:
 
-For Stripe Payment Links:
+https://dashboard.stripe.com/payment-links/create/standard-pricing
 
-1. Create a product with a **one-time** USD 10.00 price.
-2. Create a Payment Link using quantity 1.
-3. Collect customer email and enable receipts as appropriate.
-4. Set the after-payment redirect to:
+Create the following product:
 
-   `https://chenchongzhi.github.io/ChenChongZhi/?session_id={CHECKOUT_SESSION_ID}#agent`
+- **Product:** Q-PGA Founding Agent Access
+- **Price:** USD 10.00
+- **Pricing type:** One time
+- **Quantity:** 1
+- **Recurring billing:** Off
+- **Customer email:** Collect
+- **Receipts:** Enable as appropriate
 
-5. Copy the live HTTPS Payment Link.
-6. In the GitHub repository, open **Settings → Secrets and variables → Actions → Variables**.
-7. Create the repository variable `QAGE2_CHECKOUT_URL` with the live Payment Link URL.
-8. Merge the launch branch to `main`, enable GitHub Pages with GitHub Actions and run the deployment workflow.
+For immediate digital access, prefer payment methods that confirm immediately. Delayed bank-debit or voucher methods must not unlock access until the provider confirms that payment succeeded.
+
+Set the after-payment redirect to:
+
+`https://chenchongzhi.github.io/ChenChongZhi/?session_id={CHECKOUT_SESSION_ID}#agent`
+
+Copy the final live HTTPS Payment Link.
+
+## Attach the link to GitHub Pages
+
+1. In the GitHub repository, open **Settings → Secrets and variables → Actions → Variables**.
+2. Create the repository variable `QAGE2_CHECKOUT_URL`.
+3. Paste the public `https://buy.stripe.com/...` URL as its value.
+4. Run the **Deploy QAGE2 Pharma Growth to Pages** workflow or push an approved site change to `main`.
+5. Test the checkout, success redirect, receipt and access state using a real low-risk purchase and refund workflow approved for the merchant account.
 
 The workflow injects the URL into the deployed copy of `site/index.html`. Payment Link URLs are public checkout destinations, not API secret keys.
 
